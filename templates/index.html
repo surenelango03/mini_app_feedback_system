@@ -1,0 +1,255 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Feedback System — Mini App</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* minimal, neat CSS */
+    body { padding: 20px; }
+    .card { margin-bottom: 16px; }
+    .small-input { max-width: 220px; display:inline-block; margin-right:8px; }
+    textarea { min-height: 80px; }
+    .table-wrap { max-height: 320px; overflow:auto; }
+  </style>
+</head>
+<body class="container">
+
+  <h1 class="mb-3">Feedback System</h1>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ 'danger' if cat=='danger' else 'success' }} alert-dismissible fade show" role="alert">
+          {{ msg }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="row">
+    <!-- Left column: Current data -->
+    <div class="col-md-7">
+      <div class="card">
+        <div class="card-header">All Feedbacks</div>
+        <div class="card-body table-wrap">
+          <table class="table table-sm">
+            <thead>
+              <tr><th>#</th><th>User</th><th>Product</th><th>Rating</th><th>Comment</th><th>Reply</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {% for fb in feedbacks %}
+              <tr>
+                <td>{{ fb.feedback_id }}</td>
+                <td>{{ fb.user_name }}</td>
+                <td>{{ fb.product_name }}</td>
+                <td>{{ fb.rating }}</td>
+                <td>{{ fb.comment }}</td>
+                <td>
+                  {% if fb.reply_id %}
+                    {{ fb.reply_text }} <br><small>by {{ fb.reply_vendor_name }}</small>
+                  {% else %}
+                    <em>No reply</em>
+                  {% endif %}
+                </td>
+                <td style="white-space:nowrap">
+                  <!-- Update feedback (inline small form) -->
+                  <form method="post" action="{{ url_for('update_feedback', feedback_id=fb.feedback_id) }}" style="display:inline-block">
+                    <input name="rating" type="number" min="1" max="5" value="{{ fb.rating }}" class="small-input form-control form-control-sm" />
+                    <input name="comment" value="{{ fb.comment }}" class="small-input form-control form-control-sm" />
+                    <button class="btn btn-sm btn-primary" type="submit">Save</button>
+                  </form>
+
+                  <!-- Delete -->
+                  <form method="post" action="{{ url_for('delete_feedback', feedback_id=fb.feedback_id) }}" style="display:inline-block" onsubmit="return confirm('Delete feedback?')">
+                    <button class="btn btn-sm btn-danger">Del</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Products -->
+      <div class="card">
+        <div class="card-header">Products</div>
+        <div class="card-body table-wrap">
+          <table class="table table-sm">
+            <thead><tr><th>#</th><th>Name</th><th>Vendor</th><th>Description</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for p in products %}
+              <tr>
+                <td>{{ p.id }}</td>
+                <td>{{ p.name }}</td>
+                <td>{{ p.vendor_name }}</td>
+                <td>{{ p.description }}</td>
+                <td>
+                  <form method="post" action="{{ url_for('update_product', product_id=p.id) }}" style="display:inline-block">
+                    <input name="name" value="{{ p.name }}" class="small-input form-control form-control-sm" />
+                    <input name="description" value="{{ p.description }}" class="small-input form-control form-control-sm" />
+                    <select name="vendor_id" class="form-select form-select-sm small-input">
+                      <option value="">--vendor--</option>
+                      {% for v in vendors %}
+                        <option value="{{ v.id }}" {% if v.id==p.vendor_id %}selected{% endif %}>{{ v.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <button class="btn btn-sm btn-primary">Save</button>
+                  </form>
+                  <form method="post" action="{{ url_for('delete_product', product_id=p.id) }}" style="display:inline-block" onsubmit="return confirm('Delete product?')">
+                    <button class="btn btn-sm btn-danger">Del</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right column: Create forms -->
+    <div class="col-md-5">
+
+      <!-- Create User -->
+      <div class="card">
+        <div class="card-header">Create / Manage Users</div>
+        <div class="card-body">
+          <form method="post" action="{{ url_for('create_user') }}">
+            <input name="name" placeholder="Name" class="form-control mb-2" required>
+            <input name="email" placeholder="Email" class="form-control mb-2" required>
+            <input name="role" placeholder="Role" class="form-control mb-2">
+            <button class="btn btn-primary">Create User</button>
+          </form>
+
+          <hr>
+          <h6>Existing Users</h6>
+          <div class="small table-wrap" style="max-height:140px; overflow:auto">
+            <table class="table table-sm">
+              <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Actions</th></tr></thead>
+              <tbody>
+                {% for u in users %}
+                <tr>
+                  <td>{{ u.id }}</td>
+                  <td>{{ u.name }}</td>
+                  <td>{{ u.email }}</td>
+                  <td>
+                    <form method="post" action="{{ url_for('delete_user', user_id=u.id) }}" style="display:inline-block" onsubmit="return confirm('Delete user?')">
+                      <button class="btn btn-sm btn-danger">Del</button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Vendor -->
+      <div class="card">
+        <div class="card-header">Create Vendor</div>
+        <div class="card-body">
+          <form method="post" action="{{ url_for('create_vendor') }}">
+            <input name="name" placeholder="Vendor name" class="form-control mb-2" required>
+            <input name="contact_email" placeholder="Contact email" class="form-control mb-2" required>
+            <button class="btn btn-secondary">Create Vendor</button>
+          </form>
+          <hr>
+          <h6>Vendors</h6>
+          <div style="max-height:120px; overflow:auto">
+            <table class="table table-sm">
+              <tbody>
+                {% for v in vendors %}
+                <tr>
+                  <td>{{ v.id }}</td>
+                  <td>{{ v.name }}</td>
+                  <td>{{ v.contact_email }}</td>
+                  <td>
+                    <form method="post" action="{{ url_for('delete_vendor', vendor_id=v.id) }}" style="display:inline-block" onsubmit="return confirm('Delete vendor?')">
+                      <button class="btn btn-sm btn-danger">Del</button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Product -->
+      <div class="card">
+        <div class="card-header">Create Product</div>
+        <div class="card-body">
+          <form method="post" action="{{ url_for('create_product') }}">
+            <input name="name" placeholder="Product name" class="form-control mb-2" required>
+            <input name="description" placeholder="Description" class="form-control mb-2">
+            <select name="vendor_id" class="form-select mb-2">
+              <option value="">-- Select vendor --</option>
+              {% for v in vendors %}
+                <option value="{{ v.id }}">{{ v.name }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-success">Create Product</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Create Feedback -->
+      <div class="card">
+        <div class="card-header">Create Feedback</div>
+        <div class="card-body">
+          <form method="post" action="{{ url_for('create_feedback') }}">
+            <select name="user_id" class="form-select mb-2" required>
+              <option value="">-- Select user --</option>
+              {% for u in lookup_users %}
+                <option value="{{ u.id }}">{{ u.name }}</option>
+              {% endfor %}
+            </select>
+            <select name="product_id" class="form-select mb-2" required>
+              <option value="">-- Select product --</option>
+              {% for p in lookup_products %}
+                <option value="{{ p.id }}">{{ p.name }}</option>
+              {% endfor %}
+            </select>
+            <input name="rating" type="number" min="1" max="5" placeholder="Rating (1-5)" class="form-control mb-2" required>
+            <textarea name="comment" placeholder="Comment" class="form-control mb-2"></textarea>
+            <button class="btn btn-warning">Create Feedback</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Create Reply -->
+      <div class="card">
+        <div class="card-header">Vendor Reply</div>
+        <div class="card-body">
+          <form method="post" action="{{ url_for('create_reply') }}">
+            <select name="feedback_id" class="form-select mb-2" required>
+              <option value="">-- Select feedback --</option>
+              {% for fb in feedbacks %}
+                <option value="{{ fb.feedback_id }}">#{{ fb.feedback_id }} — {{ fb.user_name }} / {{ fb.product_name }}</option>
+              {% endfor %}
+            </select>
+            <select name="vendor_id" class="form-select mb-2" required>
+              <option value="">-- Select vendor --</option>
+              {% for v in vendors %}
+                <option value="{{ v.id }}">{{ v.name }}</option>
+              {% endfor %}
+            </select>
+            <textarea name="reply_text" placeholder="Reply text" class="form-control mb-2"></textarea>
+            <button class="btn btn-info">Create Reply</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
