@@ -15,6 +15,7 @@
     </div>
     <hr>
 
+    <!-- Available Products -->
     <h5>Available Products</h5>
     {% if products %}
       {% for product in products %}
@@ -22,13 +23,32 @@
           <div class="card-body">
             <strong>Product:</strong> {{ product.name }}<br>
             <strong>Description:</strong> {{ product.description }}<br>
-            <strong>Vendor:</strong> {{ product.vendor_name }}<br>
+            <strong>Vendor:</strong> {{ product.vendor_name if product.vendor_name else 'Unknown' }}<br>
             <a href="{{ url_for('feedback', product_id=product.id) }}" class="btn btn-sm btn-primary mt-1">Give Feedback</a>
           </div>
         </div>
       {% endfor %}
     {% else %}
       <p>No products available at the moment.</p>
+    {% endif %}
+
+    <hr>
+
+    <!-- My Feedback Section -->
+    <h5>My Feedback</h5>
+    {% if my_feedbacks %}
+      {% for fb in my_feedbacks %}
+        <div class="card mb-2">
+          <div class="card-body">
+            <strong>Product:</strong> {{ fb.product_name }}<br>
+            <strong>Vendor:</strong> {{ fb.vendor_name if fb.vendor_name else 'Unknown' }}<br>
+            <strong>Rating:</strong> {{ fb.rating }}<br>
+            <strong>Feedback:</strong> {{ fb.feedback }}<br>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>You have not submitted any feedback yet.</p>
     {% endif %}
 
   </div>

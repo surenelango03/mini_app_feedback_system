@@ -79,17 +79,30 @@ def products():
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
 
-    # Join Vendors to get vendor_name
+    # Fetch all products with vendor names
     cursor.execute("""
         SELECT p.id, p.name, p.description, v.name AS vendor_name
         FROM Products p
         LEFT JOIN Vendors v ON p.vendor_id = v.id
     """)
     products_list = cursor.fetchall()
+
+    # Fetch all feedback submitted by this user
+    cursor.execute("""
+        SELECT f.id AS feedback_id, f.comment AS feedback, f.rating, p.name AS product_name, v.name AS vendor_name
+        FROM Feedback f
+        JOIN Products p ON f.product_id = p.id
+        LEFT JOIN Vendors v ON p.vendor_id = v.id
+        WHERE f.user_id = %s
+        ORDER BY f.submitted_at DESC
+    """, (user["id"],))
+    my_feedbacks = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
-    return render_template("products.html", products=products_list, user=user)
+    return render_template("products.html", products=products_list, my_feedbacks=my_feedbacks, user=user)
+
 
 
 
