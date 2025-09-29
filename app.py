@@ -75,15 +75,22 @@ def products():
     if not user or user["role"] != "customer":
         flash("You must be logged in as a customer to view products.", "danger")
         return redirect(url_for("login"))
-    
+
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Products")
+
+    # Join Vendors to get vendor_name
+    cursor.execute("""
+        SELECT p.id, p.name, p.description, v.name AS vendor_name
+        FROM Products p
+        LEFT JOIN Vendors v ON p.vendor_id = v.id
+    """)
     products_list = cursor.fetchall()
     cursor.close()
     conn.close()
-    
+
     return render_template("products.html", products=products_list, user=user)
+
 
 
 @app.route("/")
@@ -111,11 +118,13 @@ def home():
 
         # Fetch products without feedback
         cursor.execute("""
-            SELECT id, name, description
-            FROM Products
-            WHERE id NOT IN (SELECT DISTINCT product_id FROM Feedback)
+            SELECT pr.id, pr.name, pr.description, v.name AS vendor_name
+            FROM Products pr
+            JOIN Vendors v ON pr.vendor_id = v.id
+            WHERE pr.id NOT IN (SELECT DISTINCT product_id FROM Feedback)
         """)
         products_no_feedback = cursor.fetchall()
+
 
         cursor.close()
         conn.close()
@@ -130,11 +139,18 @@ def home():
         # customer flow
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM Products")
+
+        cursor.execute("""
+            SELECT p.id, p.name, p.description, v.name AS vendor_name
+            FROM Products p
+            LEFT JOIN Vendors v ON p.vendor_id = v.id
+        """)
         products_list = cursor.fetchall()
         cursor.close()
         conn.close()
+
         return render_template("products.html", products=products_list, user=user)
+
 
 
 
@@ -165,26 +181,38 @@ def logout():
 def feedback(product_id):
     user = current_user()
     if not user or user["role"] != "customer":
-        flash("Only users can leave feedback.", "danger")
+        flash("Only customers can submit feedback.", "danger")
         return redirect(url_for("login"))
 
-    if request.method == "POST":
-        comment = request.form["comment"]
-        rating = request.form["rating"]
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
 
-        conn = get_db()
-        cursor = conn.cursor()
+    if request.method == "POST":
+        rating = request.form["rating"]
+        feedback_text = request.form["feedback"]  # changed from comment
         cursor.execute(
-            "INSERT INTO Feedback (comment, rating, product_id, user_id) VALUES (%s, %s, %s, %s)",
-            (comment, rating, product_id, user["id"])
+            "INSERT INTO Feedback (comment, rating, product_id, user_id, submitted_at) VALUES (%s, %s, %s, %s, NOW())",
+            (feedback_text, rating, product_id, user["id"])
         )
         conn.commit()
+        flash("Feedback submitted successfully!", "success")
         cursor.close()
         conn.close()
-        flash("Feedback submitted!", "success")
-        return redirect(url_for("home"))
+        return redirect(url_for("products"))
 
-    return render_template("feedback_form.html", product_id=product_id, user=user)
+    # Get product info + vendor name
+    cursor.execute("""
+        SELECT p.id, p.name, p.description, v.name AS vendor_name
+        FROM Products p
+        JOIN Vendors v ON p.vendor_id = v.id
+        WHERE p.id = %s
+    """, (product_id,))
+    product = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    return render_template("feedback_form.html", product=product, user=user)
+
 
 
 @app.route("/reply/<int:feedback_id>", methods=["GET", "POST"])

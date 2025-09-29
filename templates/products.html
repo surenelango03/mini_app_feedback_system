@@ -7,23 +7,30 @@
 </head>
 <body class="bg-light">
   <div class="container mt-4">
+
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4>Products Dashboard</h4>
+      <h4>Welcome, {{ user.name }} (Customer)</h4>
       <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
     </div>
     <hr>
-    {% for product in products %}
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5 class="card-title">{{ product.name }}</h5>
-          <p class="card-text">{{ product.description }}</p>
-          {% if user and user.role == 'customer' %}
-            <a href="{{ url_for('feedback', product_id=product.id) }}" class="btn btn-sm btn-success">Leave Feedback</a>
-          {% endif %}
+
+    <h5>Available Products</h5>
+    {% if products %}
+      {% for product in products %}
+        <div class="card mb-2">
+          <div class="card-body">
+            <strong>Product:</strong> {{ product.name }}<br>
+            <strong>Description:</strong> {{ product.description }}<br>
+            <strong>Vendor:</strong> {{ product.vendor_name }}<br>
+            <a href="{{ url_for('feedback', product_id=product.id) }}" class="btn btn-sm btn-primary mt-1">Give Feedback</a>
+          </div>
         </div>
-      </div>
-    {% endfor %}
-    <a href="{{ url_for('home') }}" class="btn btn-secondary mt-2">Back to Home</a>
+      {% endfor %}
+    {% else %}
+      <p>No products available at the moment.</p>
+    {% endif %}
+
   </div>
 </body>
 </html>

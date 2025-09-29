@@ -25,7 +25,7 @@
         <div class="card mb-2">
           <div class="card-body">
             <strong>Product:</strong> {{ fb.product_name }}<br>
-            <strong>Comment:</strong> {{ fb.comment }}<br>
+            <strong>Feedback:</strong> {{ fb.comment }}<br>
             <strong>Rating:</strong> {{ fb.rating }}<br>
             {% if fb.feedback_id in reply_map %}
               <strong>Reply:</strong> {{ reply_map[fb.feedback_id] }}
@@ -47,6 +47,7 @@
           <div class="card-body">
             <strong>Product:</strong> {{ p.name }}<br>
             <strong>Description:</strong> {{ p.description }}<br>
+            <strong>Vendor:</strong> {{ p.vendor_name }}
           </div>
         </div>
       {% endfor %}
