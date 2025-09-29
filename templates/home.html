@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-4">
+    {% if user %}
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Welcome, {{ user.name }} ({{ user.role }})</h4>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
+      </div>
+      <hr>
+      {% if user.role == 'customer' %}
+        <a href="{{ url_for('products') }}" class="btn btn-primary">View Products</a>
+      {% elif user.role == 'admin' %}
+        <a href="{{ url_for('home') }}" class="btn btn-primary">Go to Dashboard</a>
+      {% endif %}
+    {% else %}
+      <h4>Please <a href="{{ url_for('login') }}">login</a></h4>
+    {% endif %}
+  </div>
+</body>
+</html>

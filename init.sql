@@ -52,7 +52,10 @@ CREATE TABLE Review_Replies (
 INSERT INTO Users (name, email, role) VALUES
 ('Alice', 'alice@example.com', 'customer'),
 ('Bob', 'bob@example.com', 'customer'),
-('Charlie', 'charlie@example.com', 'customer');
+('Charlie', 'charlie@example.com', 'customer'),
+('ram', 'ram.admin@example.com', 'admin'),
+('mahesh', 'mahesh.admin@example.com', 'admin'),
+('kumar', 'kumar.admin@example.com', 'admin');
 
 -- Sample Vendors
 INSERT INTO Vendors (name, contact_email) VALUES
@@ -60,10 +63,12 @@ INSERT INTO Vendors (name, contact_email) VALUES
 ('Book World', 'bookworld@example.com');
 
 -- Sample Products
-INSERT INTO Products (name, description, vendor_id) VALUES
-('Smartphone X', 'Latest smartphone with AI camera', 1),
-('Wireless Earbuds', 'Noise-cancelling earbuds', 1),
-('Fantasy Novel', 'A bestselling fantasy adventure', 2);
+INSERT INTO Products (name, description, vendor_id, created_at) VALUES
+('Smartphone X', 'Latest model with OLED display', 1, NOW()),
+('Wireless Headphones', 'Noise-cancelling over-ear headphones', 2, NOW()),
+('Gaming Laptop', 'High performance laptop for gaming', 1, NOW()),
+('Electric Kettle', 'Fast-boil 1.5L kettle', 2, NOW()),
+('Bluetooth Speaker', 'Portable speaker with deep bass', 2, NOW());
 
 -- Sample Feedback
 INSERT INTO Feedback (comment, rating, product_id, user_id) VALUES
