@@ -4,49 +4,59 @@
   <meta charset="UTF-8">
   <title>Products</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <style>
+    body { background-color: #f8f9fa; }
+    .card { border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+    .section-title { color: #0d6efd; margin-top: 2rem; margin-bottom: 1rem; }
+    .btn-feedback { background-color: #0d6efd; border-color: #0d6efd; }
+    .btn-feedback:hover { background-color: #0b5ed7; }
+  </style>
 </head>
-<body class="bg-light">
-  <div class="container mt-4">
+<body>
+  <div class="container mt-5">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4>Welcome, {{ user.name }} (Customer)</h4>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="text-primary">Welcome, {{ user.name }} (Customer)</h4>
       <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
     </div>
-    <hr>
 
     <!-- Available Products -->
-    <h5>Available Products</h5>
+    <h5 class="section-title">Available Products</h5>
     {% if products %}
+      <div class="row">
       {% for product in products %}
-        <div class="card mb-2">
-          <div class="card-body">
-            <strong>Product:</strong> {{ product.name }}<br>
-            <strong>Description:</strong> {{ product.description }}<br>
-            <strong>Vendor:</strong> {{ product.vendor_name if product.vendor_name else 'Unknown' }}<br>
-            <a href="{{ url_for('feedback', product_id=product.id) }}" class="btn btn-sm btn-primary mt-1">Give Feedback</a>
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h6>{{ product.name }}</h6>
+            <p><strong>Description:</strong> {{ product.description }}</p>
+            <p><strong>Vendor:</strong> {{ product.vendor_name if product.vendor_name else 'Unknown' }}</p>
+            <a href="{{ url_for('feedback', product_id=product.id) }}" class="btn btn-feedback btn-sm">Give Feedback</a>
           </div>
         </div>
       {% endfor %}
+      </div>
     {% else %}
       <p>No products available at the moment.</p>
     {% endif %}
 
-    <hr>
-
-    <!-- My Feedback Section -->
-    <h5>My Feedback</h5>
+    <!-- My Feedback -->
+    <h5 class="section-title">My Feedback</h5>
     {% if my_feedbacks %}
+      <div class="row">
       {% for fb in my_feedbacks %}
-        <div class="card mb-2">
-          <div class="card-body">
-            <strong>Product:</strong> {{ fb.product_name }}<br>
-            <strong>Vendor:</strong> {{ fb.vendor_name if fb.vendor_name else 'Unknown' }}<br>
-            <strong>Rating:</strong> {{ fb.rating }}<br>
-            <strong>Feedback:</strong> {{ fb.feedback }}<br>
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h6>{{ fb.product_name }}</h6>
+            <p><strong>Vendor:</strong> {{ fb.vendor_name if fb.vendor_name else 'Unknown' }}</p>
+            <p><strong>Rating:</strong> {{ fb.rating }}</p>
+            <p><strong>Feedback:</strong> {{ fb.feedback }}</p>
           </div>
         </div>
       {% endfor %}
+      </div>
     {% else %}
       <p>You have not submitted any feedback yet.</p>
     {% endif %}
