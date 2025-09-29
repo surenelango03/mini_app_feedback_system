@@ -1,3 +1,5 @@
+import os
+os.system("mysql -u flaskuser -prishisuren < init.sql")
 from flask import Flask, render_template, request, redirect, url_for, flash
 import mysql.connector
 from mysql.connector import Error
@@ -8,7 +10,7 @@ app.secret_key = "replace_with_a_random_secret"
 # --- Configure DB connection (change credentials as needed) ---
 DB_CONFIG = {
     "host": "localhost",
-    "user": "root",
+    "user": "flaskuser",
     "password": "rishisuren",   # <-- change
     "database": "feedback_system"
 }
