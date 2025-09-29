@@ -34,6 +34,41 @@ def current_user():
 
 # ------------------ Routes ------------------
 
+@app.route("/delete_product/<int:product_id>", methods=["POST"])
+def delete_product(product_id):
+    user = current_user()
+    if not user or user["role"] != "admin":
+        flash("Only admins can delete products.", "danger")
+        return redirect(url_for("login"))
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        # 1️⃣ Delete replies related to feedback of this product
+        cursor.execute("""
+            DELETE rr FROM Review_Replies rr
+            JOIN Feedback f ON rr.feedback_id = f.id
+            WHERE f.product_id = %s
+        """, (product_id,))
+
+        # 2️⃣ Delete feedback of this product
+        cursor.execute("DELETE FROM Feedback WHERE product_id = %s", (product_id,))
+
+        # 3️⃣ Delete the product itself
+        cursor.execute("DELETE FROM Products WHERE id = %s", (product_id,))
+
+        conn.commit()
+        flash("Product and all related feedback/replies deleted successfully!", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error deleting product: {str(e)}", "danger")
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("home"))
+
 
 @app.route("/add_product", methods=["GET", "POST"])
 def add_product():
