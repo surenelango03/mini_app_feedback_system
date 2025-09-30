@@ -75,11 +75,11 @@ INSERT INTO Feedback (comment, rating, product_id, user_id) VALUES
 ('Great phone, very smooth!', 5, 1, 1),
 ('Battery life could be better.', 3, 1, 2),
 ('Loved the sound quality!', 4, 2, 3),
-('Amazing book, couldn’t put it down.', 5, 3, 1);
+('Amazing book, could not put it down.', 5, 3, 1);
 
 -- Sample Review Replies
 INSERT INTO Review_Replies (reply_text, feedback_id, vendor_id) VALUES
 ('Thank you for your feedback, Alice!', 1, 1),
-('We’ll work on improving battery life.', 2, 1),
+('We will work on improving battery life.', 2, 1),
 ('Glad you enjoyed it!', 4, 2);
 
