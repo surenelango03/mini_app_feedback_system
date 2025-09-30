@@ -34,6 +34,57 @@ def current_user():
 
 # ------------------ Routes ------------------
 
+@app.route("/product_summary")
+def product_summary():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+
+    # Aggregate feedback info for each product
+    cursor.execute("""
+        SELECT p.id, p.name, p.description, v.name AS vendor_name,
+               COUNT(f.id) AS feedback_count,
+               IFNULL(ROUND(AVG(f.rating),2),0) AS avg_rating,
+               IFNULL(MAX(f.rating),0) AS max_rating,
+               IFNULL(MIN(f.rating),0) AS min_rating
+        FROM Products p
+        LEFT JOIN Vendors v ON p.vendor_id = v.id
+        LEFT JOIN Feedback f ON f.product_id = p.id
+        GROUP BY p.id, p.name, p.description, v.name
+        ORDER BY p.name
+    """)
+    products_summary = cursor.fetchall()
+
+    # Fetch counts for top statistics
+    cursor.execute("SELECT COUNT(*) AS product_count FROM Products")
+    product_count = cursor.fetchone()["product_count"]
+
+    cursor.execute("SELECT COUNT(*) AS vendor_count FROM Vendors")
+    vendor_count = cursor.fetchone()["vendor_count"]
+
+    cursor.execute("SELECT COUNT(*) AS user_count FROM Users")
+    user_count = cursor.fetchone()["user_count"]
+
+    cursor.execute("SELECT COUNT(*) AS feedback_count FROM Feedback")
+    feedback_count = cursor.fetchone()["feedback_count"]
+
+    cursor.execute("SELECT COUNT(*) AS reply_count FROM Review_Replies")
+    reply_count = cursor.fetchone()["reply_count"]
+
+    cursor.close()
+    conn.close()
+
+    stats = {
+        "Products": product_count,
+        "Vendors": vendor_count,
+        "Users": user_count,
+        "Feedbacks": feedback_count,
+        "Replies": reply_count
+    }
+
+    return render_template("product_summary.html", products_summary=products_summary, stats=stats)
+
+
+
 @app.route("/delete_product/<int:product_id>", methods=["POST"])
 def delete_product(product_id):
     user = current_user()
