@@ -5,62 +5,84 @@
   <title>Products</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
   <style>
-    body { background-color: #f8f9fa; }
-    .card { border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-    .section-title { color: #0d6efd; margin-top: 2rem; margin-bottom: 1rem; }
-    .btn-feedback { background-color: #0d6efd; border-color: #0d6efd; }
-    .btn-feedback:hover { background-color: #0b5ed7; }
+    body { background-color: #f2f4f8; }
+    .card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 1rem; }
+    .section-title { color: #0d6efd; margin-top: 2rem; margin-bottom: 1rem; font-weight: bold; }
+    .btn-feedback { background-color: #0d6efd; border-color: #0d6efd; color: white; }
+    .btn-feedback:hover { background-color: #0b5ed7; border-color: #0a58ca; }
+    .card h6 { color: #333; font-weight: bold; }
+    .card p { margin-bottom: 0.5rem; }
   </style>
 </head>
 <body>
-  <div class="container mt-5">
+<div class="container mt-5">
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4 class="text-primary">Welcome, {{ user.name }} (Customer)</h4>
-      <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
-    </div>
-
-    <!-- Available Products -->
-    <h5 class="section-title">Available Products</h5>
-    {% if products %}
-      <div class="row">
-      {% for product in products %}
-        <div class="col-md-6">
-          <div class="card p-3">
-            <h6>{{ product.name }}</h6>
-            <p><strong>Description:</strong> {{ product.description }}</p>
-            <p><strong>Vendor:</strong> {{ product.vendor_name if product.vendor_name else 'Unknown' }}</p>
-            <a href="{{ url_for('feedback', product_id=product.id) }}" class="btn btn-feedback btn-sm">Give Feedback</a>
-          </div>
-        </div>
-      {% endfor %}
-      </div>
-    {% else %}
-      <p>No products available at the moment.</p>
-    {% endif %}
-
-    <!-- My Feedback -->
-    <h5 class="section-title">My Feedback</h5>
-    {% if my_feedbacks %}
-      <div class="row">
-      {% for fb in my_feedbacks %}
-        <div class="col-md-6">
-          <div class="card p-3">
-            <h6>{{ fb.product_name }}</h6>
-            <p><strong>Vendor:</strong> {{ fb.vendor_name if fb.vendor_name else 'Unknown' }}</p>
-            <p><strong>Rating:</strong> {{ fb.rating }}</p>
-            <p><strong>Feedback:</strong> {{ fb.feedback }}</p>
-          </div>
-        </div>
-      {% endfor %}
-      </div>
-    {% else %}
-      <p>You have not submitted any feedback yet.</p>
-    {% endif %}
-
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="text-primary">Welcome, {{ user.name }} (Customer)</h4>
+    <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
   </div>
+
+  <!-- Available Products -->
+  <h5 class="section-title">Available Products</h5>
+  {% if products %}
+    <div class="row">
+    {% for product in products %}
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h6>{{ product.name }}</h6>
+          <p><strong>Description:</strong> {{ product.description }}</p>
+          <p><strong>Vendor:</strong> {{ product.vendor_name if product.vendor_name else 'Unknown' }}</p>
+          <a href="{{ url_for('feedback', product_id=product.id) }}" class="btn btn-feedback btn-sm">Give Feedback</a>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+  {% else %}
+    <p>No products available at the moment.</p>
+  {% endif %}
+
+  <!-- Feedbacks with Replies -->
+  <h5 class="section-title">Feedbacks</h5>
+  {% if feedbacks_with_replies %}
+    <div class="row">
+    {% for fb in feedbacks_with_replies %}
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h6>{{ fb.product_name }}</h6>
+          <p><strong>Vendor:</strong> {{ fb.vendor_name if fb.vendor_name else 'Unknown' }}</p>
+          <p><strong>Rating:</strong> {{ fb.rating }}</p>
+          <p><strong>Feedback:</strong> {{ fb.feedback }}</p>
+          <p><strong>Reply:</strong> {{ fb.reply_text if fb.reply_text else 'No reply yet' }}</p>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+  {% else %}
+    <p>No feedbacks with replies yet.</p>
+  {% endif %}
+
+  <!-- All Replies Section -->
+  <h5 class="section-title">All Replies to Feedbacks</h5>
+  {% if all_replies %}
+    <div class="row">
+    {% for reply in all_replies %}
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h6>{{ reply.product_name }}</h6>
+          <p><strong>Vendor:</strong> {{ reply.vendor_name if reply.vendor_name else 'Unknown' }}</p>
+          <p><strong>Feedback:</strong> {{ reply.feedback }}</p>
+          <p><strong>Rating:</strong> {{ reply.rating }}</p>
+          <p><strong>Reply:</strong> {{ reply.reply_text }}</p>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+  {% else %}
+    <p>No replies yet.</p>
+  {% endif %}
+
+</div>
 </body>
 </html>

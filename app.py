@@ -103,7 +103,6 @@ def add_product():
     conn.close()
     return render_template("add_product.html", user=user, vendors=vendors)
 
-
 @app.route("/products")
 def products():
     user = current_user()
@@ -122,21 +121,46 @@ def products():
     """)
     products_list = cursor.fetchall()
 
-    # Fetch all feedback submitted by this user
+    # Fetch all feedbacks with replies (if any)
     cursor.execute("""
-        SELECT f.id AS feedback_id, f.comment AS feedback, f.rating, p.name AS product_name, v.name AS vendor_name
+        SELECT f.id AS feedback_id,
+               f.comment AS feedback,
+               f.rating,
+               p.name AS product_name,
+               v.name AS vendor_name,
+               rr.reply_text
         FROM Feedback f
         JOIN Products p ON f.product_id = p.id
         LEFT JOIN Vendors v ON p.vendor_id = v.id
-        WHERE f.user_id = %s
+        LEFT JOIN Review_Replies rr ON rr.feedback_id = f.id
         ORDER BY f.submitted_at DESC
-    """, (user["id"],))
-    my_feedbacks = cursor.fetchall()
+    """)
+    feedbacks_with_replies = cursor.fetchall()
+
+    # Fetch all replies (with feedback, product, vendor info)
+    cursor.execute("""
+        SELECT rr.reply_text, rr.feedback_id, rr.vendor_id,
+               f.comment AS feedback, f.rating,
+               p.name AS product_name,
+               v.name AS vendor_name
+        FROM Review_Replies rr
+        JOIN Feedback f ON rr.feedback_id = f.id
+        JOIN Products p ON f.product_id = p.id
+        LEFT JOIN Vendors v ON p.vendor_id = v.id
+        ORDER BY rr.id DESC
+    """)
+    all_replies = cursor.fetchall()
 
     cursor.close()
     conn.close()
 
-    return render_template("products.html", products=products_list, my_feedbacks=my_feedbacks, user=user)
+    return render_template(
+        "products.html",
+        products=products_list,
+        feedbacks_with_replies=feedbacks_with_replies,
+        all_replies=all_replies,
+        user=user
+    )
 
 
 
@@ -188,19 +212,55 @@ def home():
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
 
+        # Fetch all products with vendor names
         cursor.execute("""
             SELECT p.id, p.name, p.description, v.name AS vendor_name
             FROM Products p
             LEFT JOIN Vendors v ON p.vendor_id = v.id
         """)
         products_list = cursor.fetchall()
+
+        # Fetch all feedbacks with replies (if any)
+        cursor.execute("""
+            SELECT f.id AS feedback_id,
+                   f.comment AS feedback,
+                   f.rating,
+                   p.name AS product_name,
+                   v.name AS vendor_name,
+                   rr.reply_text
+            FROM Feedback f
+            JOIN Products p ON f.product_id = p.id
+            LEFT JOIN Vendors v ON p.vendor_id = v.id
+            LEFT JOIN Review_Replies rr ON rr.feedback_id = f.id
+            ORDER BY f.submitted_at DESC
+        """)
+        feedbacks_with_replies = cursor.fetchall()
+
+        # Fetch all replies (with feedback, product, vendor info)
+        cursor.execute("""
+            SELECT rr.reply_text, rr.feedback_id, rr.vendor_id,
+                   f.comment AS feedback, f.rating,
+                   p.name AS product_name,
+                   v.name AS vendor_name
+            FROM Review_Replies rr
+            JOIN Feedback f ON rr.feedback_id = f.id
+            JOIN Products p ON f.product_id = p.id
+            LEFT JOIN Vendors v ON p.vendor_id = v.id
+            ORDER BY rr.id DESC
+        """)
+        all_replies = cursor.fetchall()
+
         cursor.close()
         conn.close()
 
-        return render_template("products.html", products=products_list, user=user)
-
-
-
+        return render_template(
+            "products.html",
+            products=products_list,
+            feedbacks_with_replies=feedbacks_with_replies,
+            all_replies=all_replies,
+            user=user
+        )
+# ...existing code...
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
