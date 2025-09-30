@@ -8,6 +8,7 @@ CREATE TABLE Users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,       -- Added password column
     role VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -48,14 +49,14 @@ CREATE TABLE Review_Replies (
     FOREIGN KEY (vendor_id) REFERENCES Vendors(id) ON DELETE CASCADE
 );
 
--- Sample Users
-INSERT INTO Users (name, email, role) VALUES
-('Alice', 'alice@example.com', 'customer'),
-('Bob', 'bob@example.com', 'customer'),
-('Charlie', 'charlie@example.com', 'customer'),
-('ram', 'ram.admin@example.com', 'admin'),
-('mahesh', 'mahesh.admin@example.com', 'admin'),
-('kumar', 'kumar.admin@example.com', 'admin');
+-- Sample Users with passwords (plain text)
+INSERT INTO Users (name, email, password, role) VALUES
+('Alice', 'alice@example.com', 'alice123', 'customer'),
+('Bob', 'bob@example.com', 'bob123', 'customer'),
+('Charlie', 'charlie@example.com', 'charlie123', 'customer'),
+('ram', 'ram.admin@example.com', 'ram123', 'admin'),
+('mahesh', 'mahesh.admin@example.com', 'mahesh123', 'admin'),
+('kumar', 'kumar.admin@example.com', 'kumar123', 'admin');
 
 -- Sample Vendors
 INSERT INTO Vendors (name, contact_email) VALUES
@@ -82,4 +83,3 @@ INSERT INTO Review_Replies (reply_text, feedback_id, vendor_id) VALUES
 ('Thank you for your feedback, Alice!', 1, 1),
 ('We will work on improving battery life.', 2, 1),
 ('Glad you enjoyed it!', 4, 2);
-

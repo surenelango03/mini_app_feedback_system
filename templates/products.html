@@ -44,7 +44,7 @@
   {% endif %}
 
   <!-- Feedbacks with Replies -->
-  <h5 class="section-title">Feedbacks</h5>
+  <h5 class="section-title">Feedbacks & Replies</h5>
   {% if feedbacks_with_replies %}
     <div class="row">
     {% for fb in feedbacks_with_replies %}
@@ -61,26 +61,6 @@
     </div>
   {% else %}
     <p>No feedbacks with replies yet.</p>
-  {% endif %}
-
-  <!-- All Replies Section -->
-  <h5 class="section-title">All Replies to Feedbacks</h5>
-  {% if all_replies %}
-    <div class="row">
-    {% for reply in all_replies %}
-      <div class="col-md-6">
-        <div class="card p-3">
-          <h6>{{ reply.product_name }}</h6>
-          <p><strong>Vendor:</strong> {{ reply.vendor_name if reply.vendor_name else 'Unknown' }}</p>
-          <p><strong>Feedback:</strong> {{ reply.feedback }}</p>
-          <p><strong>Rating:</strong> {{ reply.rating }}</p>
-          <p><strong>Reply:</strong> {{ reply.reply_text }}</p>
-        </div>
-      </div>
-    {% endfor %}
-    </div>
-  {% else %}
-    <p>No replies yet.</p>
   {% endif %}
 
 </div>
